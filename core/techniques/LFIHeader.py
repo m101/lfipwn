@@ -6,15 +6,6 @@ class LFIHeader (LFIExec):
         { 'path' : '/proc/self/environ', 'type' : 'header' },
     ]
 
-    # check if we got code exec
-    def __check (self, content):
-        lines = content.split ('\n')
-        regexp = re.compile (self.lfi.tag_exec_code)
-        for line in lines:
-            if len (regexp.findall (line)) != 0:
-                return True
-        return False
-
     # find LFI code execution path
     def check (self):
         return super(LFIHeader, self)._check (prepare_check_header)

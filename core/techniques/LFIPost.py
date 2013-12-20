@@ -6,15 +6,6 @@ class LFIPost (LFIExec):
         { 'path' : 'php://input', 'type' : 'post' },
     ]
 
-    # check if we got code exec
-    def __check (self, content):
-        lines = content.split ('\n')
-        regexp = re.compile (self.lfi.tag_exec_code)
-        for line in lines:
-            if len (regexp.findall (line)) != 0:
-                return True
-        return False
-
     # find LFI code execution path
     def check (self):
         return super(LFIPost, self)._check (prepare_exec_header)
