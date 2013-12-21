@@ -41,12 +41,10 @@ class LFIApacheLog (LFIExec):
         return super (LFIApacheLog, self).__init__(lfi)
 
     # find LFI code execution path
-    # TODO : user-agent
     def check (self):
         return super (LFIApacheLog, self)._check (prepare_check_log)
 
     # do exec
-    # TODO : randomize user-agent
     def exploit (self, cmd):
         return super (LFIApacheLog, self)._exploit (prepare_exec_log, cmd)
 
