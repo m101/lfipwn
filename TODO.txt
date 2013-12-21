@@ -1,0 +1,19 @@
+Techniques
+- implement path truncation techniques
+- implement proper directory traversal techniques
+
+Detection
+- implement user custom string search
+- implement array path leak trick
+
+Tests
+- testing POST parameters
+- testing HEADERS
+
+Misc
+- implement proxyfying
+- take into account log length limitation for command injection through logs:
+- cleaner + object oriented code
+- parser : headers (cookies, langage, etc)
+- randomize user agent
+

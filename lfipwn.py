@@ -12,19 +12,6 @@ import sys
 # custom module
 from core.lfi import LFI
 
-'''
-TODO:
-- randomize user agent
-- implement path truncation techniques
-- implement proper directory traversal techniques
-- implement user custom string search
-- implement array path leak trick
-- implement testing POST parameters
-- implement proxyfying
-- take into account log length limitation for command injection through logs:
-- cleaner + object oriented code
-'''
-
 # argument parser
 parser = argparse.ArgumentParser(description='Exploit LFI')
 parser.add_argument('--url', '-u', nargs=1, type=str, help='URL to attack', required=True)
