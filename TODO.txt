@@ -1,6 +1,9 @@
 Techniques
 - implement path truncation techniques
 - implement proper directory traversal techniques
+- log injection through mail.log
+- code execution through PHP Sessions (in /var/lib/php5/, /tmp/, etc)
+- code execution through temporary uploaded file using phpinfo() info leaks
 
 Detection
 - implement user custom string search
