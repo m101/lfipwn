@@ -7,7 +7,7 @@ from random import *
 # decode correct one and store potentials
 def scrap_b64str (content):
     # search for base64 strings, shorter than 17 chars is refused
-    regexp_b64 = re.compile ('[A-Za-z0-9+/=]{16,}=+')
+    regexp_b64 = re.compile ('[A-Za-z0-9+/=]{16,}=*')
     words = regexp_b64.findall (content)
 
     # validate each base64
